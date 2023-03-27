@@ -5,10 +5,7 @@ import service.TreasureService;
 import storage.InFileTreasureStorage;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static console.ConsoleReader.readInteger;
 import static console.ConsoleReader.readString;
@@ -18,7 +15,7 @@ public class ConsoleApplication {
     InFileTreasureStorage inFileTreasureStorage = new InFileTreasureStorage();
     TreasureService treasureService = new TreasureService();
 
-    public void run() throws IOException {
+    public void run(){
 
         writer("Select operation type\n1.Give the treasure to the dragon\n2." +
                 "Collect all dragon treasures\n3." +
@@ -32,12 +29,22 @@ public class ConsoleApplication {
                     int priceTreasure = readInteger();
                     Treasure treasure = new Treasure(nameTreasure, priceTreasure);
                     treasureService.create(treasure);
+                    break;
                 case 2:
-                    inFileTreasureStorage.findAll();
-                    return;
-                case 3:
-                  inFileTreasureStorage.findPrice();
+                    List<Treasure> all = inFileTreasureStorage.findAll();
+                    ListIterator<Treasure> listIterator = all.listIterator();
+                    while (listIterator.hasNext()) {
+                        writer(listIterator.next().toString());
+                    }
 
+                    break;
+                case 3:
+                    Optional<Treasure> treasureMaxPrice = inFileTreasureStorage.findTreasureMaxPrice();
+                    if(treasureMaxPrice.isPresent()) {
+                        writer(treasureMaxPrice.get().toString());
+                    }else{
+                        writer("Treasure not found");
+                    }
 
 
             }

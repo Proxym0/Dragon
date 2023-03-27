@@ -3,14 +3,15 @@ package storage;
 import entity.Treasure;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 public class InFileTreasureStorage {
 
     public void save(Treasure treasure) {
         try (FileWriter fileWriter = new FileWriter("storage", true)) {
-            fileWriter.write(treasure.toString());
+            fileWriter.write(convertToString(treasure));
             fileWriter.write("\n");
             fileWriter.flush();
         } catch (IOException e) {
@@ -18,43 +19,49 @@ public class InFileTreasureStorage {
         }
     }
 
-    public Optional<Treasure> findAll() {
-        try (FileInputStream fileInputStream = new FileInputStream("storage")) {
-            int i;
-            while ((i = fileInputStream.read()) != -1) {
-                System.out.print((char) i);
+    public List<Treasure> findAll() {
+        List<Treasure> entities = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("storage"))) {
+            String input;
+            while ((input = reader.readLine()) != null) {
+
+                Treasure treasure = convertToEntity(input);
+                entities.add(treasure);
+            }
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return entities;
+    }
+
+    protected String convertToString(Treasure treasure) {
+        return String.format("%s=%s", treasure.getNameTreasure(), treasure.getPrice());
+    }
+
+    public Optional<Treasure> findTreasureMaxPrice() {
+        Treasure maxPrice = new Treasure();
+        try (BufferedReader reader = new BufferedReader((new FileReader("storage")))) {
+            String input;
+            while ((input = reader.readLine()) != null) {
+                Treasure treasure = convertToEntity(input);
+                maxPrice = (maxPrice.getPrice() < treasure.getPrice()) ? treasure : maxPrice;
+
             }
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return Optional.empty();
+        return (maxPrice.getPrice() == 0) ? Optional.empty() : Optional.of(maxPrice);
     }
 
-    public void findPrice() throws IOException {
-        BufferedReader br = new BufferedReader(new FileReader("storage.txt"));
-        BufferedReader reader = new BufferedReader(new FileReader(br.readLine()));
-        BufferedWriter writer = new BufferedWriter(new FileWriter(br.readLine()));
+    public Treasure convertToEntity(String treasure) {
+        String[] split = treasure.split("=");
+        return new Treasure(split[0], Integer.parseInt(split[1]));
 
-        StringBuilder builder = new StringBuilder();
-
-        while (br.ready()) {
-            builder.append((char) reader.read());
-        }
-
-        String s = builder.toString();
-
-        String[] parts = s.split("[^0-9]");
-
-        for (int i = 0; i < parts.length; i++) {
-            if (!parts[i].equals("")) {
-                writer.write(parts[i]+" ");
-            }
-        }
-
-        reader.close();
-        br.close();
-        writer.close();
     }
 }
+
+
+
 
 

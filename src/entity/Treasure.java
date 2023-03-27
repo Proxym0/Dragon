@@ -16,7 +16,7 @@ public class Treasure {
         return nameTreasure;
     }
 
-    public int getPriceTreasure() {
+    public int getPrice() {
         return priceTreasure;
     }
 
